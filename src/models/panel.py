@@ -11,7 +11,7 @@ class Panel(BaseModel):
     path = Column(String(150), nullable=False)
     domain = Column(String(150), nullable=False)
     login = Column(String(150), nullable=False)
-    password_hash = Column(String(255), nullable=False)
+    password = Column(String(255), nullable=False)
     country = Column(String(150), nullable=False)
     subscriptions = relationship(
         "Subscription",
@@ -19,3 +19,4 @@ class Panel(BaseModel):
         back_populates="panels",
         lazy='selectin'
     )
+    cookie = Column(String(750), nullable=True)

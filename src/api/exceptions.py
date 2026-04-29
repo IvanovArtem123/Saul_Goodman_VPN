@@ -3,7 +3,7 @@ from fastapi import HTTPException
 
 def error(status_code: int, message: str) -> HTTPException:
     """Возвращает Исключение ошибки с детальной информацией."""
-    return HTTPException(
+    raise HTTPException(
         status_code=status_code,
         detail={'code': status_code, 'message': message}
     )

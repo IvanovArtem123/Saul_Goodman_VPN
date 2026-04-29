@@ -76,6 +76,6 @@ class PanelUpdate(PanelCreate):
 class PanelInfo(PanelShortInfo):
     """Полная информация о панели."""
     login: Annotated[str, StringConstraints(min_length=1, max_length=150)]
-    password_hash: Annotated[str, StringConstraints(min_length=1, max_length=255)]
+    password: Annotated[str, StringConstraints(min_length=1, max_length=255)]
 
     model_config = ConfigDict(from_attributes=True)

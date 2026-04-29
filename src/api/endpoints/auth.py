@@ -1,5 +1,6 @@
 from typing import Annotated
 
+from fastapi.params import Body
 from sqlalchemy import select
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -44,8 +45,8 @@ async def authenticate_user(
     summary='Вход',
 )
 async def login(
-    form: Annotated[AuthData, Depends(AuthData.as_form)],
     session: Annotated[AsyncSession, Depends(get_async_session)],
+    form: Annotated[AuthData, Depends(AuthData.as_form)]
 ) -> AuthToken:
     """Авторизация пользователя по логину и паролю."""
     user = await authenticate_user(session, form.login, form.password)

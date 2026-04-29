@@ -1,6 +1,7 @@
-from datetime import datetime, timezone
+import uuid
+
 from enum import IntEnum
-from sqlalchemy import Column, DateTime, Integer, ForeignKey, CheckConstraint
+from sqlalchemy import Column, DateTime, Integer, ForeignKey, CheckConstraint, String
 from sqlalchemy.orm import relationship
 
 from .base import BaseModel
@@ -15,6 +16,15 @@ class SubscriptionStatus(IntEnum):
     FRIZED = 2
 
 
+class Subscription_Date_Levels(IntEnum):
+    """Уровни даты подписки."""
+
+    DAY = 1
+    MONTH = 2
+    HALF_YEAR = 3
+    YEAR = 4
+
+
 class Subscription(BaseModel):
     """Модель пользовательской подписки."""
 
@@ -25,6 +35,12 @@ class Subscription(BaseModel):
         secondary=subscription_panels,
         back_populates="subscriptions",
         lazy='selectin'
+    )
+    code = Column(
+        String(16),
+        unique=True,
+        nullable=False,
+        default=lambda: uuid.uuid4().hex[:16]
     )
     status = Column(
         Integer,

@@ -1,10 +1,10 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import HTTPException, status
-from api.exceptions import bad_request
+from api.exceptions import bad_request, not_found
 from sqlalchemy import select, or_
 
 from schemas.user import UserCreate
-from models.user import User
+from models.user import User, UserRole
+from crud.user import user_crud
 
 
 async def check_unique_email_username_phone_tgid(
@@ -14,8 +14,7 @@ async def check_unique_email_username_phone_tgid(
     """Проверка на уникальность полей модели пользователя:
     email
     username
-    phone
-    tg_id"""
+    phone"""
     conditions = []
     if user_obj.username:
         conditions.append(User.username == user_obj.username)
@@ -27,10 +26,10 @@ async def check_unique_email_username_phone_tgid(
         existing_users = await session.execute(
             select(User).where(or_(*conditions))
         )
-        existing_users = existing_users.scalars().all()
-        if existing_users:
+        existing_obj_users = existing_users.scalars().all()
+        if existing_obj_users:
             message = 'Поля уже заняты: '
-            for existing in existing_users:
+            for existing in existing_obj_users:
                 if (user_obj.username and
                         existing.username == user_obj.username):
                     message += 'username, '
@@ -41,3 +40,23 @@ async def check_unique_email_username_phone_tgid(
             result = message[:-2] + '.'
             raise bad_request(result)
     return None
+
+
+async def check_current_user_admin_or_SU(
+        user: User
+) -> bool:
+    """Проверка является юзер админом или суперюзером."""
+    if user.role == UserRole.ADMIN or user.role == UserRole.SUPER_USER:
+        return True
+    return False
+
+
+async def get_user_or_404(
+        user_id: int,
+        session: AsyncSession
+) -> User:
+    """Получить пользователя по id или 404 ошибку."""
+    result = await user_crud.get(session=session, obj_id=user_id)
+    if not result:
+        raise not_found('Пользователь не найден.')
+    return result

@@ -19,6 +19,7 @@ class UserRole(IntEnum):
 
     USER = 0
     ADMIN = 1
+    SUPER_USER = 2
 
 
 class User(BaseModel):

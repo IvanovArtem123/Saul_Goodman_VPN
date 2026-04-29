@@ -1,4 +1,4 @@
-from typing import Generic, Optional, TypeVar
+from typing import Generic, Optional, TypeVar, List
 
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
@@ -17,6 +17,19 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     def __init__(self, model: type[ModelType]) -> None:
         """Сохранить класс ORM-модели, с которой работает CRUD."""
         self.model = model
+
+    async def get_all(
+        self,
+        session: AsyncSession,
+        **kwargs: Optional[dict],
+    ) -> list[ModelType]:
+        """Получение всех объектов модели, которые соответствуют фильтру `**kwargs`."""
+        query = select(self.model)
+        for field, value in kwargs.items():
+            if hasattr(self.model, field) and (value is not None):
+                query = query.where(getattr(self.model, field) == value)
+        result = await session.execute(query)
+        return result.scalars().all()
 
     async def get(
         self,

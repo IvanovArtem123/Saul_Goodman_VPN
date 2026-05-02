@@ -10,7 +10,7 @@
 MVP достигнуто. Бэк возвращает список ключей пользователя. Дальше больше...
 
 Запуск проекта:
-1) git clone
+1) git clone https://github.com/IvanovArtem123/three_letter_name.git
 2) В корне проекта создаём виртуальное окружение: python3.14 -m venv venv (для винды py -3.14 -m venv venv)
 3) Активация виртуального окружения: source venv/bin/activate
 4) Устанавливаем зависимости: pip install -r requirements.txt

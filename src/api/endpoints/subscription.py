@@ -18,7 +18,7 @@ from models.user import User
 from api.exceptions import forbidden
 from api.validators.user import get_user_or_404
 from api.validators.panel import check_exits_panels
-from api.keys import GetKeys, AddUserToInbounds
+from api.keys import AddUserToInbounds
 from api.validators.user import check_current_user_admin_or_SU
 from api.validators.panel import check_exits_panels
 from api.services import get_current_user

@@ -1,5 +1,4 @@
 import json
-import requests
 
 from schemas.panel import PanelCreate, PanelUpdate
 from sqlalchemy.ext.asyncio import AsyncSession

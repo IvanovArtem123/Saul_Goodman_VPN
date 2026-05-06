@@ -1,7 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Path, Query, status
-from fastapi.encoders import jsonable_encoder
+from fastapi import APIRouter, Depends, Path, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.db import get_async_session
@@ -11,6 +10,7 @@ from api.services import get_current_user
 
 
 router = APIRouter(prefix='/panels', tags=['Панели'])
+
 
 @router.post(
     '/create',

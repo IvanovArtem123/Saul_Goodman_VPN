@@ -1,7 +1,8 @@
 from sqlalchemy import (CheckConstraint, Column, Integer, String,
-                        UniqueConstraint)
+                        UniqueConstraint, Boolean)
 import uuid
 from enum import IntEnum
+from sqlalchemy.orm import relationship
 
 from .base import BaseModel
 from core.constants import (
@@ -44,6 +45,12 @@ class User(BaseModel):
         ),
         UniqueConstraint('email', name='uq_users_email'),
         UniqueConstraint('phone', name='uq_users_phone'),
+    )
+    subscriptions = relationship(
+        "Subscription",
+        backref="user",
+        cascade="all, delete-orphan",
+        passive_deletes=True
     )
     role = Column(Integer, nullable=False, default=int(UserRole.USER))
     uuid = Column(

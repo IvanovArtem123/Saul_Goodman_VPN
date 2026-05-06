@@ -150,7 +150,7 @@ class CreateClientInbound():
         return responses
 
 
-class AddUserToInbpounds():
+class AddUserToInbounds():
     """Класс добавления пользователя во все inbound панели управления."""
     def __init__(
             self,

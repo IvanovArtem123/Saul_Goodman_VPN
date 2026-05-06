@@ -58,7 +58,6 @@ class SubscriptionUpdate(BaseModel):
 class SubscriptionShortInfo(BaseModel):
     id: int
     user_id: int
-    keys: list[str]
     code: str
     end_date: datetime
     status: int
@@ -68,6 +67,7 @@ class SubscriptionShortInfo(BaseModel):
 
 class SubscriptionInfo(SubscriptionShortInfo):
     created_at: datetime
+    keys: list[str]
 
 
 class SubscriptionCode(BaseModel):

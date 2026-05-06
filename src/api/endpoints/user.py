@@ -5,13 +5,12 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.db import get_async_session
-from schemas.user import UserCreate, UserShortInfo, UserUpdate
+from schemas.user import UserCreate, UserShortInfo, UserUpdate, UserInfo
 from crud.user import user_crud
 from api.services import get_current_user
 from api.validators.user import (
-    check_unique_email_username_phone_tgid,
-    check_current_user_admin_or_SU,
-    get_user_or_404
+    check_unique_email_username_phone_tgid, check_current_user_admin_or_SU,
+    get_user_or_404, check_permission_values
     )
 from api.exceptions import bad_request, forbidden
 from models.user import User
@@ -21,13 +20,13 @@ router = APIRouter(prefix='/users', tags=['Пользователи'])
 
 @router.get(
     '/me',
-    response_model=UserShortInfo,
+    response_model=UserInfo,
     status_code=status.HTTP_200_OK,
     summary='Информация о текущем пользователе'
 )
 async def get_current_user_info(
     user: Annotated[User, Depends(get_current_user)]
-) -> UserShortInfo:
+) -> UserInfo:
     """Получить информацию о текущем пользователе."""
     return user
 
@@ -42,7 +41,7 @@ async def get_all_users(
     user: Annotated[User, Depends(get_current_user)]
 ) -> List[UserShortInfo]:
     if await check_current_user_admin_or_SU(user):
-        return await user_crud.get_multi(session)
+        return await user_crud.get_all(session)
     return forbidden('Недостаточно прав для получения списка пользователей')
 
 
@@ -106,22 +105,24 @@ async def update_user(
                 }),
 ) -> UserShortInfo:
     """Обновить информацию о пользователе."""
-    if (await check_current_user_admin_or_SU(user) or
-            (user.id == user_id)):
-        db_user = await get_user_or_404(user_id, session)
-        if db_user:
-            await check_unique_email_username_phone_tgid(
-                user_in,
-                session,
-                user_id=user_id
+    if ((not await check_current_user_admin_or_SU(user)) or
+            (not (user.id == user_id))):
+        return bad_request(
+            'Недостаточно прав для обновления информации о пользователе.'
             )
-            return await user_crud.update_hash_password(
-                db_obj=db_user,
-                obj_in=user_in,
-                session=session
-            )
-    return bad_request(
-        'Недостаточно прав для обновления информации о пользователе.'
+    db_user = await get_user_or_404(user_id, session)
+    await check_permission_values(
+        user=db_user,
+        user_in=user_in)
+    if db_user:
+        await check_unique_email_username_phone_tgid(
+            session=session,
+            user_obj=user_in
+        )
+        return await user_crud.update_user_with_hash_password(
+            db_obj=db_user,
+            obj_in=user_in,
+            session=session
         )
 
 
@@ -136,9 +137,9 @@ async def delete_user(
     user_id: int,
 ) -> None:
     """Удалить пользователя."""
-    if (await check_current_user_admin_or_SU(user) or
+    if not (await check_current_user_admin_or_SU(user) or
             (user.id == user_id)):
-        result = await get_user_or_404(user_id, session)
-        if result:
-            await user_crud.delete(db_obj=user, session=session)
-    return bad_request('Недостаточно прав для удаления пользователя.')
+        return bad_request('Недостаточно прав для удаления пользователя.')
+    user = await get_user_or_404(user_id, session)
+    if user:
+        await user_crud.delete(db_obj=user, session=session)

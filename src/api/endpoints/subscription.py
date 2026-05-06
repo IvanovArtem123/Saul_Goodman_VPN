@@ -1,10 +1,10 @@
-from typing import Annotated
+from typing import Annotated, List
 
 from fastapi import APIRouter, Depends, Path, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.db import get_async_session
-from api.services import get_current_user
+
 from schemas.subscription import (
     SubscriptionCode,
     SubscriptionInfo,
@@ -12,9 +12,16 @@ from schemas.subscription import (
     SubscriptionShortInfo)
 from crud.subscription import sub_crud
 from crud.panel import panel_crud
-from api.validators.user import get_user_or_404
-from api.keys import GetKeys, AddUserToInbpounds
 
+from models.user import User
+
+from api.exceptions import forbidden
+from api.validators.user import get_user_or_404
+from api.validators.panel import check_exits_panels
+from api.keys import GetKeys, AddUserToInbounds
+from api.validators.user import check_current_user_admin_or_SU
+from api.validators.panel import check_exits_panels
+from api.services import get_current_user
 
 router = APIRouter(prefix='/sub', tags=['Подписки'])
 
@@ -31,10 +38,10 @@ async def create_subscription(
 ) -> SubscriptionCode:
     """Создание подписки для пользователя."""
     user = await get_user_or_404(session=session, user_id=obj_in.user_id)
-    all_panels = await panel_crud.get_all(session) #  пока все панели 
+    all_panels = await check_exits_panels(session=session) #  пока все панели
     new_sub = await sub_crud.create_subscription(
         session=session, obj_in=obj_in, panels=all_panels)
-    obj = AddUserToInbpounds(
+    obj = AddUserToInbounds(
         session=session,
         user=user,
         sub=new_sub
@@ -43,6 +50,26 @@ async def create_subscription(
     return SubscriptionCode(
         code=new_sub.code
         )
+
+
+@router.get(
+    '/get_all',
+    response_model=List[SubscriptionShortInfo],
+    status_code=status.HTTP_200_OK,
+    summary='Получение всех подписок',
+    dependencies=[Depends(get_current_user)]
+)
+async def get_all_sub(
+    user: Annotated[User, Depends(get_current_user)],
+    session: AsyncSession = Depends(get_async_session)
+) -> List[SubscriptionShortInfo]:
+    '''Получение всех подписок только для адмэнов.'''
+    if not await check_current_user_admin_or_SU(user):
+        return forbidden(
+            'У вас недостаточно прав для получения всех подписок.'
+            )
+    all_sub = await sub_crud.get_all(session=session)
+    return all_sub
 
 
 @router.get(
@@ -62,7 +89,7 @@ async def get_keys_by_sub_code(
         session=session
         )
     user = await get_user_or_404(session=session, user_id=sub.user_id)
-    obj = AddUserToInbpounds(
+    obj = AddUserToInbounds(
         session=session,
         user=user,
         sub=sub
@@ -77,8 +104,6 @@ async def get_keys_by_sub_code(
         end_date=sub.end_date,
         status=sub.status
     )
-
-
 
 
 @router.delete(
@@ -97,3 +122,4 @@ async def delete_subscription_by_sub_code(
         session=session
     )
     await sub_crud.delete(session=session, db_obj=subscription)
+

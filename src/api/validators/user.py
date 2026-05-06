@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from api.exceptions import bad_request, not_found
+from api.exceptions import bad_request, not_found, forbidden
 from sqlalchemy import select, or_
 
 from schemas.user import UserCreate
@@ -43,7 +43,7 @@ async def check_unique_email_username_phone_tgid(
 
 
 async def check_current_user_admin_or_SU(
-        user: User
+    user: User
 ) -> bool:
     """Проверка является юзер админом или суперюзером."""
     if user.role == UserRole.ADMIN or user.role == UserRole.SUPER_USER:
@@ -52,11 +52,24 @@ async def check_current_user_admin_or_SU(
 
 
 async def get_user_or_404(
-        user_id: int,
-        session: AsyncSession
+    user_id: int,
+    session: AsyncSession
 ) -> User:
     """Получить пользователя по id или 404 ошибку."""
     result = await user_crud.get(session=session, obj_id=user_id)
     if not result:
         raise not_found('Пользователь не найден.')
     return result
+
+
+async def check_permission_values(
+    user_in: UserCreate, user: User
+) -> None:
+    '''
+    Проверяем может ли пользователь изменять поля:
+    role
+    '''
+    if user_in.role and (
+        user.role != UserRole.ADMIN or user.role != UserRole.SUPER_USER
+    ):
+        raise forbidden('У Вас недостаточно прав для изменения своей роли.')

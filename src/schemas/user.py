@@ -2,6 +2,7 @@ from datetime import datetime
 from enum import IntEnum
 from typing import Annotated, Optional
 from pydantic.config import Extra
+import re
 
 from pydantic import (
     BaseModel,
@@ -10,6 +11,7 @@ from pydantic import (
     Field,
     StringConstraints,
     field_validator,
+    field_serializer,
 )
 
 from core.constants import EMAIL_MAX, PHONE_MAX, TG_ID_MAX, USERNAME_MAX
@@ -86,6 +88,10 @@ class UserInfo(UserShortInfo):
     created_at: datetime
     updated_at: datetime
 
+    @field_serializer('role')
+    def serialize_role(self, role: UserRole) -> str:
+        return role.name.lower()
+
 
 class UserUpdate(BaseModel):
     """Модель для частичного обновления пользователя."""
@@ -105,23 +111,14 @@ class UserUpdate(BaseModel):
         v = v.strip()
         return v or None
 
-    @field_validator('username')
+    @field_validator('email')
     @classmethod
-    def _username_not_blank(cls, v: str | None) -> str | None:
+    def _check_format_email(cls, v: str | None) -> str | None:
         if v is None:
-            return None
-        if not v.strip():
-            raise ValueError('Имя пользователя не может быть пустым')
-        return v
-
-    @field_validator('password')
-    @classmethod
-    def _password_not_blank(cls, v: str | None) -> str | None:
-        if v is None:
-            return None
-        v = v.strip()
-        if not v:
-            raise ValueError('Пароль не может быть пустым')
-        if len(v) < 6:
-            raise ValueError('Минимальная длина пароля — 6 символов')
+            return v
+        pattern = r'^[a-zA-Z0-9][a-zA-Z0-9._%+-]{0,63}@gmail\.com$'
+        if not re.match(pattern, v):
+            raise ValueError(
+                'Некорректный формат email. Принимается только @gmail.com'
+                )
         return v

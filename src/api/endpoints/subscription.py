@@ -122,4 +122,3 @@ async def delete_subscription_by_sub_code(
         session=session
     )
     await sub_crud.delete(session=session, db_obj=subscription)
-

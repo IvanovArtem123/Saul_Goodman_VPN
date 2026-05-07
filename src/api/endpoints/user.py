@@ -71,12 +71,17 @@ async def get_user_info(
 async def create_user(
     session: Annotated[AsyncSession, Depends(get_async_session)],
     user_in: UserCreate = Body(
-                example={
-                    'username': 'TestName1',
-                    'password': 'TestPassword1',
-                    'email': 'testmail@gmail.com',
-                    'phone': '+79998887766',
-                    'tg_id': '123456789'
+                openapi_examples={
+                    'user1': {
+                        'summary': 'Пример пользователя',
+                        'value': {
+                            'username': 'TestName1',
+                            'password': 'TestPassword1',
+                            'email': 'testmail@gmail.com',
+                            'phone': '+79998887766',
+                            'tg_id': '123456789'
+                        }
+                    }
                 }
             ),
 ) -> UserShortInfo:
@@ -96,12 +101,17 @@ async def update_user(
     user: Annotated[User, Depends(get_current_user)],
     user_id: int,
     user_in: UserUpdate = Body(
-                example={
-                    'username': 'TestName2',
-                    'password': 'TestPassword2',
-                    'email': 'testmail@mail.com',
-                    'phone': '+79998887766',
-                    'tg_id': '123456789'
+                openapi_examples={
+                    'user1_update': {
+                        'summary': 'Пример обновления пользователя для user1',
+                        'value': {
+                            'username': 'TestName1_up',
+                            'password': 'TestPassword1_up',
+                            'email': 'testmail_up@gmail.com',
+                            'phone': '+79998887765',
+                            'tg_id': '123456785'
+                        }
+                    }
                 }),
 ) -> UserShortInfo:
     """Обновить информацию о пользователе."""

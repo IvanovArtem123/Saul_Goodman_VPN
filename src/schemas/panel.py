@@ -45,6 +45,7 @@ class PanelShortInfo(BaseModel):
     id: int
     path: PathPanelStr
     domain: DomainPanelStr
+    port: str
     country: CountryPanelStr
 
     model_config = ConfigDict(from_attributes=True)
@@ -55,6 +56,7 @@ class PanelCreate(BaseModel):
 
     path: PathPanelStr
     domain: DomainPanelStr
+    port: str
     login: Annotated[str, StringConstraints(min_length=1, max_length=150)]
     password: Annotated[str, StringConstraints(min_length=1, max_length=255)]
     country: CountryPanelStr
@@ -66,6 +68,7 @@ class PanelUpdate(PanelCreate):
     """Схема для обновления данных о панели."""
     path: Optional[PathPanelStr] = None
     domain: Optional[DomainPanelStr] = None
+    port: Optional[str] = None
     login: Optional[Annotated[str, StringConstraints(min_length=1, max_length=150)]] = None
     password: Optional[Annotated[str, StringConstraints(min_length=1, max_length=255)]] = None
     country: Optional[CountryPanelStr] = None

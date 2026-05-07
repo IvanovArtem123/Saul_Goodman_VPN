@@ -28,12 +28,13 @@ class AddUserToInbounds():
             limits=httpx.Limits(max_keepalive_connections=20)
         )
 
-    async def _check_auth_cookie(self, panel: Panel) -> bool:
+    async def _check_auth_cookie(
+            self, panel: Panel, base_url_panel: str
+            ) -> bool:
         """Проверка авторизационной cookie панели управления."""
         cookie = await panel_crud.get_cookie_by_panel_id(
             panel_id=panel.id,
             session=self.session)
-        base_url_panel = f"https://{panel.domain}/{panel.path}"
         url = base_url_panel + "/api/inbounds/list"
         response = await self.client.get(url=url, cookies=cookie, timeout=30)
         if response.status_code != 200:
@@ -91,7 +92,7 @@ class AddUserToInbounds():
         url = base_url_panel + f'/panel/api/inbounds/get/{inbound_id}'
         response = await self.client.get(url=url, cookies=cookie)
         return response.text
-    
+
     async def _del_client(
             self, cookie: dict, inbound_id: int, uuid: str, base_url_panel: str
     ) -> int:
@@ -105,8 +106,10 @@ class AddUserToInbounds():
         panels = self.sub.panels
         result = []
         for panel in panels:
-            base_url_panel = f"https://{panel.domain}/{panel.path}"
-            if not await self._check_auth_cookie(panel=panel):
+            base_url_panel = f"https://{panel.domain}{panel.port}/{panel.path}"
+            if not await self._check_auth_cookie(
+                panel=panel, base_url_panel=base_url_panel
+                ):
                 cookie = await self._login_panel(
                     panel=panel, base_url_panel=base_url_panel)
                 inbounds_id = await self._get_inbounds(
@@ -125,8 +128,10 @@ class AddUserToInbounds():
         uuid = self.user.uuid
         panels = self.sub.panels
         for panel in panels:
-            base_url_panel = f"https://{panel.domain}/{panel.path}"
-            if not await self._check_auth_cookie(panel=panel):
+            base_url_panel = f"https://{panel.domain}{panel.port}/{panel.path}"
+            if not await self._check_auth_cookie(
+                panel=panel, base_url_panel=base_url_panel
+                ):
                 cookie = await self._login_panel(
                     panel=panel, base_url_panel=base_url_panel)
                 inbounds_id = await self._get_inbounds(
@@ -150,8 +155,10 @@ class AddUserToInbounds():
         uuid = self.user.uuid
         panels = self.sub.panels
         for panel in panels:
-            base_url_panel = f"https://{panel.domain}/{panel.path}"
-            if not await self._check_auth_cookie(panel=panel):
+            base_url_panel = f"https://{panel.domain}{panel.port}/{panel.path}"
+            if not await self._check_auth_cookie(
+                panel=panel, base_url_panel=base_url_panel
+                ):
                 cookie = await self._login_panel(
                     panel=panel, base_url_panel=base_url_panel)
                 inbounds_id = await self._get_inbounds(

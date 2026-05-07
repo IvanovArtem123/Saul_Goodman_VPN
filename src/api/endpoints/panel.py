@@ -2,6 +2,8 @@ from typing import Annotated, List
 
 from fastapi import APIRouter, Depends, Path, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi.params import Body
+
 
 from core.db import get_async_session
 from schemas.panel import PanelCreate, PanelShortInfo
@@ -10,6 +12,13 @@ from api.services import get_current_user
 from api.validators.user import check_current_user_admin_or_SU
 from api.exceptions import forbidden
 from models.user import User
+from core.constants import (
+    EXAMPLE_PATH_PANEL,
+    EXAMPLE_DOMAIN_PANEL,
+    EXAMPLE_PORT_PANEL,
+    EXAMPLE_LOGIN_PANEL,
+    EXAMPLE_PASSWORD_PANEL,
+)
 
 
 router = APIRouter(prefix='/panels', tags=['Панели'])
@@ -41,8 +50,22 @@ async def get_all_panels(
     dependencies=[Depends(get_current_user)],
 )
 async def add_panel(
-    obj_in: PanelCreate,
-    session: Annotated[AsyncSession, Depends(get_async_session)]
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+    obj_in: PanelCreate = Body(
+                openapi_examples={
+                    'Panel1': {
+                        'summary': 'Пример панели',
+                        'value': {
+                            'path': EXAMPLE_PATH_PANEL,
+                            'domain': EXAMPLE_DOMAIN_PANEL,
+                            'port': EXAMPLE_PORT_PANEL,
+                            'login': EXAMPLE_LOGIN_PANEL,
+                            'password': EXAMPLE_PASSWORD_PANEL,
+                            'country': 'Германия'
+                        }
+                    }
+                }
+            )
 ) -> PanelShortInfo:
     """Добавляет в бд новую модель."""
     panel = await panel_crud.create(obj_in=obj_in, session=session)

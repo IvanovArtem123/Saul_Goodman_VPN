@@ -10,6 +10,7 @@ class Panel(BaseModel):
 
     path = Column(String(150), nullable=False)
     domain = Column(String(150), nullable=False)
+    port = Column(String(10))
     login = Column(String(150), nullable=False)
     password = Column(String(255), nullable=False)
     country = Column(String(150), nullable=False)

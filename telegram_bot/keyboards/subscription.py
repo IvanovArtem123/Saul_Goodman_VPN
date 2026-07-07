@@ -13,19 +13,8 @@ def manage_new_sub_trial_keyboard() -> InlineKeyboardMarkup:
     )
 
 
-def manage_new_sub_keyboard() -> InlineKeyboardMarkup:
-    '''Клавиатура при покупке подписки, пробная без пробной подписки.'''
-    return InlineKeyboardMarkup(
-        inline_keyboard=[
-            [InlineKeyboardButton(text="💳 Купить подписку себе", callback_data="pay_sub")],
-            [InlineKeyboardButton(text="🎁 Подарить подписку другому", callback_data="give_sub")],
-            [InlineKeyboardButton(text="⬅️ Назад", callback_data="cancel")],
-        ]
-    )
-
-
 def new_sub_keyboard() -> InlineKeyboardMarkup:
-    '''Прайс лсит создания подписки.'''
+    '''Прайс лист создания подписки.'''
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="1 день | 15 руб.",    callback_data="new_sub:1")],
         [InlineKeyboardButton(text="1 неделя | 89 руб.",  callback_data="new_sub:2")],
@@ -33,6 +22,6 @@ def new_sub_keyboard() -> InlineKeyboardMarkup:
         [InlineKeyboardButton(text="3 месяца | 689 руб.",  callback_data="new_sub:4")],
         [InlineKeyboardButton(text="6 месяцев | 1199 руб.", callback_data="new_sub:5")],
         [InlineKeyboardButton(text="1 год | 1890 руб.",     callback_data="new_sub:6")],
-        [InlineKeyboardButton(text="3 года | 4990 руб.",    callback_data="new_sub:7")],
+        [InlineKeyboardButton(text="ПРОМОКОД",    callback_data="promo_code"), InlineKeyboardButton(text="🎁 Подарить подписку", callback_data="give_sub")],
         [InlineKeyboardButton(text="⬅️ Назад", callback_data="cancel")],
     ])

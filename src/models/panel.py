@@ -20,4 +20,3 @@ class Panel(BaseModel):
         back_populates="panels",
         lazy='selectin'
     )
-    cookie = Column(JSON, nullable=True)

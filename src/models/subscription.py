@@ -30,7 +30,6 @@ class Subscription_Date_Levels(IntEnum):
     THREE_MONTHS = 4
     HALF_YEAR = 5
     YEAR = 6
-    THREE_YEARS = 7
 
     @classmethod
     def get_all_levels(cls) -> list[int]:
@@ -41,7 +40,7 @@ class Subscription(BaseModel):
     """Модель пользовательской подписки."""
 
     user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
-    end_date = Column(DateTime(timezone=True), nullable=False)
+    end_date = Column(DateTime(timezone=True), nullable=True)
     panels = relationship(
         "Panel",
         secondary=subscription_panels,

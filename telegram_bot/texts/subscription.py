@@ -60,4 +60,3 @@ async def build_manage_sub_text(trial_subs: list = [],
     if not (trial_text or user_subs_text or gift_subs_text):
         result += 'У вас нет активных подписок.'
     return result
-

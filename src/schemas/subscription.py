@@ -45,7 +45,6 @@ CountryPanelStr = Annotated[
 class SubscriptionUpdate(BaseModel):
     end_date_level: Optional[int] = None
     status: Optional[int] = 1
-    is_active: Optional[bool] = None
 
     model_config = ConfigDict(extra=Extra.forbid)
 
@@ -93,7 +92,6 @@ class SubscriptionShortInfo(BaseModel):
     status: int
     is_trial: bool
     is_gift: bool
-    is_active: bool
     code: str
 
     model_config = ConfigDict(from_attributes=True)

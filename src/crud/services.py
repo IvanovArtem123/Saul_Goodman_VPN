@@ -20,7 +20,5 @@ def setup_end_date_subscription(start_date: datetime, level: int) -> datetime:
             return start_date + relativedelta(months=6)
         case Subscription_Date_Levels.YEAR:
             return start_date + relativedelta(years=1)
-        case Subscription_Date_Levels.THREE_YEARS:
-            return start_date + relativedelta(years=3)
         case _:
             raise ValueError(f'Неизвестный уровень подписки: {level}')

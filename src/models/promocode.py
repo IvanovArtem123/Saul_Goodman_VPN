@@ -1,6 +1,6 @@
 from enum import IntEnum
-from sqlalchemy import Column, String, Boolean, Integer, DateTime
-from sqlalchemy.orm import validates
+from sqlalchemy import Column, ForeignKey, String, Boolean, Integer, DateTime
+from sqlalchemy.orm import relationship, validates
 
 from .base import BaseModel
 from .constants import MAX_LEN_PROMOCODE
@@ -21,17 +21,30 @@ class PromocodePurpose(IntEnum):
 class Promocode(BaseModel):
     code = Column(String(MAX_LEN_PROMOCODE), nullable=False, unique=True,
                   index=True)
-    is_active = Column(Boolean, nullable=False, default=False, index=True)
-    is_disposable = Column(Boolean, nullable=False, default=False)
+    is_active = Column(Boolean, nullable=False, default=False, index=True) # активен / неактивен
+    is_disposable = Column(Boolean, nullable=False, default=False)  # одноразовый / многоразовый
     purpose = Column(Integer, nullable=False,
-                     default=PromocodePurpose.DISCOUNT.value)
-    end_date = Column(DateTime, nullable=True)
-    used_count = Column(Integer, default=0)
-    usage_limit = Column(Integer, default=1)
+                     default=PromocodePurpose.DISCOUNT.value)  # назначение промокода
+    end_date = Column(DateTime, nullable=True)  # дата окончания действия промокода
+    used_count = Column(Integer, default=0)  # количество использований
+    usage_limit = Column(Integer, default=1)  # лимит использований
+    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'),
+                     nullable=True, index=True)  # ID пользователя, который создал промокод
+    user = relationship(
+        "User",
+        back_populates="promocodes"
+    )
 
     @validates('code')
     def convert_upper(self, key, value):
         """Автоматически преобразует промокод в верхний регистр"""
         if isinstance(value, str):
             return value.upper()
+        return value
+
+    @validates('usage_limit')
+    def validate_usage_limit(self, key, value):
+        if self.is_disposable and value != 1:
+            raise ValueError('Для одноразового промокода лимит '
+                             'использования должен быть 1')
         return value

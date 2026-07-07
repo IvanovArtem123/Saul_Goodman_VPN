@@ -1,17 +1,19 @@
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
-from manage_users import ManageUser
-
+from aiogram.fsm.context import FSMContext
 from keyboards.start import start_keyboard
+from manage_users import ManageUser
+from .utils import ServiceCallback
 
 router = Router()
 
 
 @router.message(Command("start"))
-async def cmd_start(message: Message, session):
+async def cmd_start(message: Message, session, state: FSMContext):
     if message.from_user is None:
-        await message.answer("Не удалось определить пользователя. Попробуйте позже.")
+        await message.answer('Не удалось определить пользователя.'
+                             ' Попробуйте позже.')
         return
     manage_user = ManageUser(
         user_tg_id=message.from_user.id,
@@ -20,7 +22,12 @@ async def cmd_start(message: Message, session):
     user = await manage_user.get_user()
     if user == 404:
         await manage_user.create_user()
+    await state.set_state(ServiceCallback.start_menu)
+    await state.update_data(
+        return_text='Привет! Тебе нужен VPN? Тогда Saul Goodman поможет тебе!',
+        return_keyboard=start_keyboard()
+    )
     await message.answer(
-        "Привет! Тебе нужен VPN? Тогда Saul Goodman поможет тебе!",
+        text='Привет! Тебе нужен VPN? Тогда Saul Goodman поможет тебе!',
         reply_markup=start_keyboard()
     )

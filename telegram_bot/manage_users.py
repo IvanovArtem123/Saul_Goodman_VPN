@@ -17,8 +17,10 @@ logger = logging.getLogger(__name__)
 
 class ManageUser:
     def __init__(
-            self, user_tg_id: int, username_tg: str,
-            client_session: ClientSession):
+            self, user_tg_id: int,
+            client_session: ClientSession,
+            username_tg: str = None,
+            ):
         self.user_tg_id = user_tg_id
         self.username_tg = username_tg
         self.email = str(self.user_tg_id) + '@tg_pass.soul'
@@ -81,6 +83,8 @@ class ManageUser:
                     }) as response:
             if response.status == 200:
                 return await response.json()
+            elif response.status == 409:
+                return 409
             else:
                 None
 

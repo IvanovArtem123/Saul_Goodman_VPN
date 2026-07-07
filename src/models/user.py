@@ -43,4 +43,9 @@ class User(BaseModel):
     google_id = Column(String(255), unique=True, nullable=True)
     tg_id = Column(BigInteger, unique=True, nullable=True)
     new = Column(Boolean, nullable=False, default=True)
-    promocodes = relationship('Promocode', back_populates='author')
+    promocodes = relationship(
+        "Promocode",
+        back_populates="user",
+        cascade="all, delete-orphan",
+        passive_deletes=True
+    )

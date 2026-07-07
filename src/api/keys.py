@@ -1,4 +1,5 @@
 import json
+from typing import List
 
 import httpx
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -101,7 +102,7 @@ class ManageUserUI():
 
     async def get_keys(self) -> list[str | None]:
         '''Получение всех ключей для подписки.'''
-        all_keys = []
+        all_keys: List[str | None] = []
         for panel in self.panels_list:
             base_url_panel = f"https://{panel.domain}{panel.port}/{panel.path}"
             keys_panel = await self._get_keys_user_in_panel(

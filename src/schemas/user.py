@@ -9,15 +9,11 @@ from pydantic import (
 )
 
 from models.user import UserRole
-from core.constants import PHONE_MAX, USERNAME_MAX
+from core.constants import USERNAME_MAX
 
 UsernameStr = Annotated[
     str,
     StringConstraints(strip_whitespace=True, max_length=USERNAME_MAX),
-]
-PhoneStr = Annotated[
-    str,
-    StringConstraints(strip_whitespace=True, max_length=PHONE_MAX),
 ]
 
 

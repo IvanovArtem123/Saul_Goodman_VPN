@@ -67,3 +67,14 @@ async def create_promocode(
     )
     return promocode
 
+@router.post(
+    '/activate_promo_code/{promocode}',
+    response_model=PromocodeShortInfo,
+    status_code=status.HTTP_200_OK,
+    summary='Активация промокода'
+)
+async def activate_promocode(
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> PromocodeShortInfo:
+    '''Активация промокода'''

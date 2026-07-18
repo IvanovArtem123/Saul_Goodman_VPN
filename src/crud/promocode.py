@@ -44,4 +44,5 @@ class CRUDPromocode(CRUDBase[Promocode, PromocodeCreate, PromocodeInfo]):
         await session.refresh(promocode)
         return promocode
 
+
 promocode_crud = CRUDPromocode(Promocode)

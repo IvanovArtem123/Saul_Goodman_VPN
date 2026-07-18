@@ -30,7 +30,17 @@ async def check_data_promocode(promo_data: PromocodeCreate):
     if promo_data.purpose == PromocodePurpose.REFERRAL:
         if promo_data.end_date:
             bad_request('У реферального промокода не может быть '
-                        'срока действи.')
+                        'срока действия.')
+        if promo_data.usage_limit:
+            bad_request('У реферального промокода не может ограничений на '
+                        'количество использований.')
+        if promo_data.sub_level:
+            return bad_request('У реферального промокода не может быть '
+                               'уровня подписки.')
+        if promo_data.target_user_ids != []:
+            return bad_request('Реферальный промокод не может быть назначен '
+                               'для активации некоторыми пользователями.')
+
 
 
 async def get_promo_or_404(session, id: int):

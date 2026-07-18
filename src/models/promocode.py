@@ -1,4 +1,3 @@
-from typing import List
 from enum import IntEnum
 from sqlalchemy import (Column, ForeignKey, String, Boolean, Integer, DateTime,
                         ARRAY)
@@ -21,21 +20,23 @@ class PromocodePurpose(IntEnum):
 
 
 class Promocode(BaseModel):
+    """МОдель промокода."""
     code = Column(String(MAX_LEN_PROMOCODE), nullable=False, unique=True,
                   index=True)
     is_active = Column(Boolean, nullable=False, default=True, index=True)
     # активен / неактивен
-    is_disposable = Column(Boolean, nullable=False, default=False)
-    # одноразовый / многоразовый
     purpose = Column(Integer, nullable=False,
                      default=PromocodePurpose.DISCOUNT.value)
     # назначение промокода
     end_date = Column(DateTime, nullable=True)
     # дата окончания действия промокода
     used_count = Column(Integer, default=0)
+    sub_id = Column(Integer, ForeignKey('subscription.id', ondelete='CASCADE'),
+                    nullable=True, index=True)
     # количество использований
-    usage_limit = Column(Integer, default=1, nullable=True)
+    usage_limit = Column(Integer, default=0, nullable=True)
     # лимит использований
+    sub_level = Column(Integer, nullable=True)
     user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'),
                      nullable=True, index=True)
     # ID пользователя, который создал промокод
@@ -52,11 +53,4 @@ class Promocode(BaseModel):
         """Автоматически преобразует промокод в верхний регистр"""
         if isinstance(value, str):
             return value.upper()
-        return value
-
-    @validates('usage_limit')
-    def validate_usage_limit(self, key, value):
-        if self.is_disposable and value != 1:
-            raise ValueError('Для одноразового промокода лимит '
-                             'использования должен быть 1')
         return value

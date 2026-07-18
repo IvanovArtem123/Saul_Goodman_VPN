@@ -29,13 +29,15 @@ class CRUDPromocode(CRUDBase[Promocode, PromocodeCreate, PromocodeInfo]):
             user_id: int) -> Promocode:
         """Создание промокода для конкретного пользователя."""
         promocode = Promocode(
-            user_id=user_id,
             code=obj_in.code,
             is_active=obj_in.is_active,
-            usage_limit=obj_in.usage_limit,
             purpose=obj_in.purpose,
-            target_user_ids=obj_in.target_user_ids,
-            end_date=datetime.fromisoformat(obj_in.end_date) if obj_in.end_date else None
+            end_date=obj_in.end_date,
+            used_count=0,
+            usage_limit=obj_in.usage_limit,
+            sub_level=obj_in.sub_level,
+            user_id=user_id,
+            target_user_ids=obj_in.target_user_ids
         )
         session.add(promocode)
         await session.commit()

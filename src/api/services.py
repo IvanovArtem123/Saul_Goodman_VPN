@@ -146,14 +146,3 @@ async def making_promocode(code_len: int = 10) -> str:
     characters = string.ascii_uppercase + string.digits
     promocode = ''.join(random.choice(characters) for _ in range(code_len))
     return promocode.upper()
-
-
-async def generate_unique_code(session: AsyncSession, length: int = 10) -> str:
-    """
-    Генерирует уникальный код.
-    """
-    while True:
-        code = ''.join(choices(ascii_uppercase + digits, k=length))
-        existing = await promocode_crud.get_code(session=session, code=code)
-        if existing is None:
-            return code

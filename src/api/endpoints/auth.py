@@ -51,7 +51,7 @@ async def google_callback(
     request.session["user_id"] = str(user.id)
     request.session["user_role"] = str(user.role)
 
-    return RedirectResponse("http://127.0.0.1:5173")
+    return RedirectResponse("http://127.0.0.1:8000/docs")
 
 
 @router.get("/logout", summary="Выход")

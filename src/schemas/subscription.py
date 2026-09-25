@@ -70,8 +70,8 @@ class SubscriptionUpdate(BaseModel):
 
 class SubscriptionCreate(SubscriptionUpdate):
     '''Схема создания подписки.'''
-    user_id: int
     end_date_level: int
+    user_id: Optional[int] = None
     is_trial: Optional[bool] = False
     is_gift: Optional[bool] = False
 

@@ -12,7 +12,6 @@ from .many_to_many import subscription_panels
 class SubscriptionStatus(IntEnum):
     """Статусы подписки."""
 
-    NON_ACTIVE = 0
     ACTIVE = 1
     FRIZED = 2
 

@@ -20,4 +20,6 @@ class Panel(BaseModel):
         back_populates="panels",
         lazy='selectin'
     )
-    cookie = Column(JSON, nullable=True)
+    ip = Column(String(16), nullable=False)
+    api_token = Column(String(50), nullable=False)
+    description = Column(String(255), nullable=True)

@@ -21,6 +21,8 @@ class Settings:
         'postgresql+asyncpg://postgres:mysecretpassword@localhost:5432/myapp'
     )
     SECRET: str = os.getenv('SECRET', 'CHANGE_ME_SUPER_SECRET_32CHARS_MIN')
+    GOOGLE_CLIENT_ID: str = os.getenv('GOOGLE_CLIENT_ID')
+    GOOGLE_CLIENT_SECRET: str = os.getenv('GOOGLE_CLIENT_SECRET')
 
 
 settings = Settings()

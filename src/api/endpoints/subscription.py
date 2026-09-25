@@ -1,3 +1,4 @@
+import base64
 from typing import Annotated, List
 
 from fastapi import APIRouter, Depends, Path, status, Request
@@ -20,7 +21,7 @@ from api.validators.user import get_user_or_404
 from api.validators.panel import panels_list_or_404
 from api.validators.subscription import (check_headers, sub_or_404,
                                          check_exist_sub_to_user,)
-from api.keys import AddUserToInbounds
+from api.XUI import XUIworker
 from api.validators.user import check_current_user_admin
 from api.services import get_current_user
 from core.constants import FAKE_KEY
@@ -45,6 +46,8 @@ async def create_subscription(
         return forbidden('У вас недостаточно прав для создания '
                          'подписки для другого пользователя. '
                          'Вы можете создать подписку только для себя.')
+    if obj_in.user_id is None:
+        obj_in.user_id = user.id
     if obj_in.is_trial:
         obj_in.end_date_level = 1
     all_panels = await panels_list_or_404(session=session)  # пока все панели
@@ -53,12 +56,12 @@ async def create_subscription(
     await check_exist_sub_to_user(session=session, user_id=obj_in.user_id)
     new_sub = await sub_crud.create_subscription(
         session=session, obj_in=obj_in, panels=all_panels)
-    obj = AddUserToInbounds(
+    obj = XUIworker(
         session=session,
         user=user_in_sub,
         sub=new_sub
     )
-    await obj.add_user_to_inbounds()
+    await obj.add_client_to_panels(panels=all_panels)
     return SubscriptionCode(
         code=new_sub.code
         )
@@ -99,17 +102,19 @@ async def get_keys_by_sub_code(
         session=session
     )
     user = await get_user_or_404(session=session, user_id=sub.user_id)
-    obj = AddUserToInbounds(
+    obj = XUIworker(
         session=session,
         user=user,
         sub=sub
     )
-    if await check_headers(request=request):
-        encoded_keys = await obj.get_keys_by_subid()
-    if not await check_headers(request=request):
-        encoded_keys = FAKE_KEY
+    # if await check_headers(request=request):
+    #     encoded_keys = await obj.get_sub_keys()
+    # if not await check_headers(request=request):
+    #     encoded_keys = FAKE_KEY
+    keys = await obj.get_sub_keys(panels=sub.panels)
+    body = base64.b64encode("\n".join(keys).encode()).decode()
     return PlainTextResponse(
-        content=encoded_keys,
+        content=body,
         headers={
             'Content-Type': 'text/plain; charset=utf-8',
             'Profile-Title': 'Soul Goodman VPN',
@@ -133,9 +138,9 @@ async def delete_subscription_by_sub_code(
         session=session
     )
     user = await get_user_or_404(session=session, user_id=sub.user_id)
-    obj = AddUserToInbounds(
-        session=session,
-        user=user,
-        sub=sub)
-    await obj.delete_client_by_subid()
+    # obj = XUIworker(
+    #     session=session,
+    #     user=user,
+    #     sub=sub)
+    # await obj.delete_client_by_subid()
     await sub_crud.delete(session=session, db_obj=sub)

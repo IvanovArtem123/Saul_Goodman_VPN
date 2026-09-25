@@ -65,10 +65,12 @@ async def get_current_user(
 
 async def get_list_inbound_id(data: str) -> list[int]:
     '''Получаем id инбаундов панели.'''
-    data = json.loads(data)
-    obj = data['obj']
+    data_js = json.loads(data)
+    obj = data_js['obj']
     result = []
     for inbound in obj:
+        if inbound['subSortIndex'] > 8000:
+            continue
         inbound_id = inbound['id']
         result.append(int(inbound_id))
     return result
@@ -107,74 +109,6 @@ async def data_user_config(
         'settings': json.dumps(settings_data)
     }
     return data
-
-
-async def build_vless_link(
-        response_text: str, uuid: str, panel_domain: str) -> str:
-    obj = json.loads(response_text)['obj']
-    settings = json.loads(obj['settings'])
-    stream = json.loads(obj['streamSettings'])
-    network = stream.get('network', 'xhttp')
-    security = stream.get('security', 'reality')
-    transport_key = f"{network}Settings"
-    transport = stream.get(transport_key, {})
-    params = {}
-    params['type'] = network
-    params['encryption'] = settings.get('encryption', 'none')
-    transport_map = {
-        'path': transport.get('path'),
-        'host': transport.get('host'),
-        'mode': transport.get('mode'),
-        'serviceName': transport.get('serviceName'),
-        'authority': transport.get('authority'),
-        'headerType': transport.get('header', {}).get('type'),
-    }
-    for k, v in transport_map.items():
-        if v:
-            params[k] = urllib.parse.quote(str(v), safe='')
-    padding = transport.get(
-        'xPaddingBytes'
-        ) or transport.get(
-            'x_padding_bytes')
-    if padding:
-        params['x_padding_bytes'] = str(padding)
-        extra_dict = {"xPaddingBytes": str(padding)}
-        sc_max = transport.get('scMaxEachPostBytes')
-        if sc_max:
-            extra_dict['scMaxEachPostBytes'] = str(sc_max)
-        params['extra'] = urllib.parse.quote(
-            json.dumps(extra_dict, separators=(',', ':')),
-            safe=''
-        )
-    flow = settings.get('flow', '')
-    if flow:
-        params['flow'] = flow
-    params['security'] = security
-    if security == 'reality':
-        reality = stream.get('realitySettings', {})
-        reality_settings = reality.get('settings', {})
-        spx = reality_settings.get('spiderX', '/')
-        params['pbk'] = reality_settings.get('publicKey', '')
-        params['fp'] = reality_settings.get('fingerprint', 'chrome')
-        params['sni'] = (reality.get('serverNames') or [''])[0]
-        params['sid'] = (reality.get('shortIds') or [''])[0]
-        params['spx'] = urllib.parse.quote(spx, safe='')
-    elif security == 'tls':
-        tls = stream.get('tlsSettings', {})
-        if tls.get('serverName'):
-            params['sni'] = tls['serverName']
-        if tls.get('fingerprint'):
-            params['fp'] = tls['fingerprint']
-        if tls.get('alpn'):
-            params['alpn'] = urllib.parse.quote(','.join(tls['alpn']), safe='')
-    query = '&'.join(f"{k}={v}" for k, v in params.items() if v)
-    remark = obj.get('remark', '')
-    fragment = urllib.parse.quote(remark) if remark else ''
-    vless_url = (f'{obj['protocol']}://{uuid}@' +
-                 f'{panel_domain}:{obj['port']}?{query}')
-    if fragment:
-        vless_url += f"#{fragment}"
-    return vless_url
 
 
 async def get_inbound_transport(

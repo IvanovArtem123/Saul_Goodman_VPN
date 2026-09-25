@@ -45,6 +45,9 @@ class PanelShortInfo(BaseModel):
     domain: DomainPanelStr
     port: str
     country: CountryPanelStr
+    description: str
+    ip: str
+    api_token: str
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -58,6 +61,9 @@ class PanelCreate(BaseModel):
     login: Annotated[str, StringConstraints(min_length=1, max_length=150)]
     password: Annotated[str, StringConstraints(min_length=1, max_length=255)]
     country: CountryPanelStr
+    description: str
+    ip: str
+    api_token: str
 
     model_config = ConfigDict(extra=Extra.forbid)
 

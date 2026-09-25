@@ -14,8 +14,6 @@ from api.validators.panel import get_panel_or_404
 from api.exceptions import forbidden
 from models.user import User
 from core.constants import (
-    EXAMPLE_PATH_PANEL,
-    EXAMPLE_DOMAIN_PANEL,
     EXAMPLE_PORT_PANEL
 )
 
@@ -65,24 +63,12 @@ async def get_all_panels(
     '/create',
     response_model=PanelShortInfo,
     status_code=status.HTTP_201_CREATED,
-    summary='Новая панель',
+    summary='Добавить панель',
     dependencies=[Depends(get_current_user)],
 )
 async def add_panel(
     session: Annotated[AsyncSession, Depends(get_async_session)],
-    obj_in: PanelCreate = Body(
-                openapi_examples={
-                    'Panel1': {
-                        'summary': 'Пример панели',
-                        'value': {
-                            'path': EXAMPLE_PATH_PANEL,
-                            'domain': EXAMPLE_DOMAIN_PANEL,
-                            'port': EXAMPLE_PORT_PANEL,
-                            'country': 'Германия'
-                        }
-                    }
-                }
-            )
+    obj_in: PanelCreate
 ) -> PanelShortInfo:
     """Добавляет в бд новую модель."""
     panel = await panel_crud.create(obj_in=obj_in, session=session)
